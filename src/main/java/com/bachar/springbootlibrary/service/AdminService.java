@@ -2,6 +2,8 @@ package com.bachar.springbootlibrary.service;
 
 import com.bachar.springbootlibrary.entity.Book;
 import com.bachar.springbootlibrary.repositories.BookRepository;
+import com.bachar.springbootlibrary.repositories.CheckoutRepository;
+import com.bachar.springbootlibrary.repositories.ReviewRepository;
 import com.bachar.springbootlibrary.requrestmodels.AddBookRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,11 +15,15 @@ import java.util.Optional;
 @Transactional
 public class AdminService {
     private final BookRepository bookRepository;
+    private final CheckoutRepository checkoutRepository;
+    private final ReviewRepository reviewRepository;
 
     @Autowired
 
-    public AdminService(BookRepository bookRepository) {
+    public AdminService(BookRepository bookRepository, CheckoutRepository checkoutRepository, ReviewRepository reviewRepository) {
         this.bookRepository = bookRepository;
+        this.checkoutRepository = checkoutRepository;
+        this.reviewRepository = reviewRepository;
     }
 
 
@@ -53,5 +59,15 @@ public class AdminService {
         book.setAuthor(addBookRequest.getAuthor());
         book.setDescription(addBookRequest.getDescription());
         bookRepository.save(book);
+    }
+
+    public void deleteBook(Long bookId) throws Exception {
+        Optional<Book> book = bookRepository.findById(bookId);
+        if (!book.isPresent()) {
+            throw new Exception("Book not find");
+        }
+        bookRepository.delete(book.get());
+        checkoutRepository.deleteAllByBookId(bookId);
+        reviewRepository.deleteAllByBookId(bookId);
     }
 }

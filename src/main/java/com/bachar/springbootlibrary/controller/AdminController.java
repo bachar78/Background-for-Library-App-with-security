@@ -44,4 +44,12 @@ public class AdminController {
         adminService.decreaseBookQuantity(bookId);
     }
 
+    @DeleteMapping("/secure/delete/book")
+    public void deleteBook(@RequestHeader(value = "Authorization") String token, Long bookId) throws Exception {
+        String admin = ExtractJWT.payloadJWTExtraction(token, "\"sub\"");
+        if (admin == null || !admin.equals("admin@email.com")) {
+            throw new Exception("Administration page only.");
+        }
+        adminService.deleteBook(bookId);
+    }
 }
